@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>stringparser: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">tudai-go-entregable.com/stringparser/stringParse.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package stringparser
+
+import (
+        "errors"
+        "regexp"
+        "strconv"
+)
+
+// Función que añade los tipos
+func ParseString(s string) (*Result, error) <span class="cov8" title="1">{
+        t := parser{validTypes: make(map[string]string)}
+        t.validTypes["TX"] = "[A-Z]"
+        t.validTypes["NN"] = "[0-9]"
+        r, err := t.getResult(s)
+        return r, err
+}</span>
+
+type Result struct {
+        Type   string
+        Length int
+        Value  string
+}
+
+// Se utiliza una estructura para almacenar los tipos aceptados, el string de entrada, y el resultado que se irá validando
+// a medida que se ejecute el código
+type parser struct {
+        validTypes  map[string]string
+        inputString string
+        Result
+}
+
+// Se define una signatura común para los métodos de las validaciones
+type validParseredInputString func() (bool, error)
+
+// Se ejecutan las distintas funciones para parsear el string y validar el resultado
+func (r *parser) getResult(input string) (*Result, error) <span class="cov8" title="1">{
+        r.inputString = input
+        for _, f := range [3]validParseredInputString{r.parseInputString, r.validateType, r.validateValue} </span><span class="cov8" title="1">{
+                ok, err := f()
+                if !ok </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+        <span class="cov8" title="1">return &amp;r.Result, nil</span>
+}
+
+// Se parsean el String de entrafda utilizando el patrón de carácteres: letra, letra, número, número, número o letra u otra caracter...
+// Y se asignan los valores al resultado
+func (r *parser) parseInputString() (bool, error) <span class="cov8" title="1">{
+        re, _ := regexp.Compile(`^([A-Z]{2})(\d{2})(.*)`)
+        s := re.FindAllStringSubmatch(r.inputString, -1)
+        if s == nil </span><span class="cov8" title="1">{
+                return false, errors.New("ERROR: Invalid input string. Expected a string with Letters (L), Numbers (N), Number or Letter (X), like: LLNNXX..., but found:  " + r.inputString)
+        }</span>
+        <span class="cov8" title="1">r.Type, r.Length, r.Value = func(s []string) (string, int, string) </span><span class="cov8" title="1">{
+                length, _ := strconv.Atoi(s[2]) // Se convierte de string a número
+                return s[1], length, s[3]
+        }</span>(s[0])
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+// Se verifica que este permitido
+func (r *parser) validateType() (bool, error) <span class="cov8" title="1">{
+        _, ok := r.validTypes[r.Type]
+        if !ok </span><span class="cov8" title="1">{
+                return false, errors.New("ERROR: Invalid String Type. Unkowing type: " + r.Type)
+        }</span>
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+// Se valida el valor del resultado, es decir, que cumpla con la longitud y con el tipo del string
+func (r *parser) validateValue() (bool, error) <span class="cov8" title="1">{
+        regexp, _ := regexp.Compile(r.getValidationFoValue())
+        matched := regexp.MatchString(r.Value)
+        if !matched || r.Length != len([]byte(r.Value)) </span><span class="cov8" title="1">{
+                return false, errors.New(`ERROR: Invalid String Value. Expexted string of type "` + r.Type + `" with a length of "` + strconv.FormatInt(int64(r.Length), 10) + `", but found: "` + r.Value + `"`)
+        }</span>
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+// Retorna un string que contiene el valor de la expresión regular que valida el valor del string del resultadp
+func (r *parser) getValidationFoValue() string <span class="cov8" title="1">{
+        t := r.validTypes[r.Type]
+        return t + string("{"+strconv.FormatInt(int64(r.Length), 10)+"}")
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
