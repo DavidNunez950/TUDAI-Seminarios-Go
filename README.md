@@ -1,5 +1,9 @@
 # Seminario de GO - Entregable
 
+## Integrantes
+* David Nuñez
+* Tomás Cepeda
+
 ## Problema
 La descripción del problema se encuentra detallada en la siguiente [página de GitHub](https://github.com/juanpablopizarro/tudai2021)
 
